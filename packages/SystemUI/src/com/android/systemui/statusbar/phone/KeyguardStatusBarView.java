@@ -29,8 +29,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
@@ -115,10 +113,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private final Rect mClipRect = new Rect(0, 0, 0, 0);
     private boolean mIsUserSwitcherEnabled;
 
-    private int mStatusBarExtraPaddingStart = 0;
-    private int mStatusBarExtraPaddingTop = 0;
-    private int mStatusBarExtraPaddingEnd = 0;
-
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -163,7 +157,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
         // System icons
         updateSystemIconsLayoutParams();
 
-        updatePaddings();
+        // mStatusIconArea
+        mStatusIconArea.setPaddingRelative(
+                mStatusIconArea.getPaddingStart(),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top),
+                mStatusIconArea.getPaddingEnd(),
+                mStatusIconArea.getPaddingBottom()
+        );
 
         // mStatusIconContainer
         mStatusIconContainer.setPaddingRelative(
@@ -184,7 +184,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
+        lp = (MarginLayoutParams) mCarrierLabel.getLayoutParams();
 
+        int marginStart = calculateMargin(
+                getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
+                mPadding.left);
+        lp.setMarginStart(marginStart);
+
+        mCarrierLabel.setLayoutParams(lp);
         updateKeyguardStatusBarHeight();
     }
 
@@ -198,27 +205,8 @@ public class KeyguardStatusBarView extends RelativeLayout {
         setLayoutParams(lp);
     }
 
-    private int convertToDip(int padding) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                padding,
-                mContext.getResources().getDisplayMetrics()));
-    }
-
     void loadDimens() {
         Resources res = getResources();
-        mStatusBarExtraPaddingStart = convertToDip(Settings.System.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.System.STATUSBAR_EXTRA_PADDING_START, 0,
-                UserHandle.USER_CURRENT));
-        mStatusBarExtraPaddingTop = convertToDip(Settings.System.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.System.STATUSBAR_EXTRA_PADDING_TOP, 0,
-                UserHandle.USER_CURRENT));
-        mStatusBarExtraPaddingEnd = convertToDip(Settings.System.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.System.STATUSBAR_EXTRA_PADDING_END, 0,
-                UserHandle.USER_CURRENT));
         mSystemIconsSwitcherHiddenExpandedMargin = res.getDimensionPixelSize(
                 R.dimen.system_icons_switcher_hidden_expanded_margin);
         mStatusBarPaddingEnd = res.getDimensionPixelSize(
@@ -227,33 +215,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 R.dimen.ongoing_appops_dot_min_padding);
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
-    }
-
-    void updatePaddings() {
-        // mStatusIconArea
-        mStatusIconArea.setPaddingRelative(
-                mStatusIconArea.getPaddingStart(),
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top) + mStatusBarExtraPaddingTop,
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end) + mStatusBarExtraPaddingEnd,
-                mStatusIconArea.getPaddingBottom()
-        );
-
-        // mCarrierLabel
-        mCarrierLabel.setPaddingRelative(
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start) + mStatusBarExtraPaddingStart,
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top) + mStatusBarExtraPaddingTop,
-                mCarrierLabel.getPaddingEnd(),
-                mCarrierLabel.getPaddingBottom()
-        );
-
-        MarginLayoutParams lp = (MarginLayoutParams) mCarrierLabel.getLayoutParams();
-
-        int marginStart = calculateMargin(
-                getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
-                mPadding.left);
-        lp.setMarginStart(marginStart);
-
-        mCarrierLabel.setLayoutParams(lp);
     }
 
     private void updateVisibilities() {
@@ -295,12 +256,18 @@ public class KeyguardStatusBarView extends RelativeLayout {
         LinearLayout.LayoutParams lp =
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
 
-        // Don't use status_bar_padding_end here after all, since this is the nested system icon container,
-        // and we're going to be applying extra padding to the outer status_icon_area view instead.
+        // Use status_bar_padding_end to replace original
+        // system_icons_super_container_avatarless_margin_end to prevent different end alignment
+        // between PhoneStatusBarView and KeyguardStatusBarView
+        int baseMarginEnd = mStatusBarPaddingEnd;
         int marginEnd =
-                mKeyguardUserSwitcherEnabled ? mSystemIconsSwitcherHiddenExpandedMargin : 0;
+                mKeyguardUserSwitcherEnabled ? mSystemIconsSwitcherHiddenExpandedMargin
+                        : baseMarginEnd;
 
-        // Align PhoneStatusBar right margin/padding
+        // Align PhoneStatusBar right margin/padding, only use
+        // 1. status bar layout: mPadding(consider round_corner + privacy dot)
+        // 2. icon container: R.dimen.status_bar_padding_end
+
         if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
             mSystemIconsContainer.setLayoutParams(lp);
