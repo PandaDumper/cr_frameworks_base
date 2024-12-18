@@ -28,6 +28,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Whether even dimmer feature is enabled. -->
-    <bool name="config_evenDimmerEnabled">false</bool>
+    <bool name="config_evenDimmerEnabled">true</bool>
 
 </resources>
