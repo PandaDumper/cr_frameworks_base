@@ -6600,46 +6600,6 @@ public final class Settings {
         public static final String NOTIFICATION_MATERIAL_DISMISS = "notification_material_dismiss";
 
         /**
-         * @hide
-         */
-        public static final String QS_TILE_VERTICAL_LAYOUT = "qs_tile_vertical_layout";
-
-        /**
-         * @hide
-         */
-        public static final String QS_TILE_LABEL_HIDE = "qs_tile_label_hide";
-
-        /**
-         * @hide
-         */
-        public static final String QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
-
-        /**
-         * @hide
-         */
-        public static final String QS_LAYOUT_COLUMNS = "qs_layout_columns";
-
-        /**
-         * @hide
-         */
-        public static final String QS_LAYOUT_ROWS_LANDSCAPE = "qs_layout_rows_landscape";
-
-        /**
-         * @hide
-         */
-        public static final String QS_LAYOUT_ROWS = "qs_layout_rows";
-
-        /**
-         * @hide
-         */
-        public static final String QQS_LAYOUT_ROWS_LANDSCAPE = "qqs_layout_rows_landscape";
-
-        /**
-         * @hide
-         */
-        public static final String QQS_LAYOUT_ROWS = "qqs_layout_rows";
-
-        /**
          * Whether to show Bluetooth dialog or toggle bluetooth using Bluetooth tile
          * @hide
          */
