@@ -240,9 +240,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        if (mView.getTileLayout() != null) {
-           setTiles();
-        }
+        setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mLastScreenLayout = getResources().getConfiguration().screenLayout;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
